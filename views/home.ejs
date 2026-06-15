@@ -1,0 +1,82 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <header class="card-header">
+            <h1 class="animate-fade-in">🚀 URL Shortener</h1>
+            <p class="subtitle animate-fade-in">
+                Convert long, messy URLs into clean, shareable links instantly.
+            </p>
+        </header>
+
+        <form action="/url" method="POST" class="shortener-form animate-slide-up">
+            <div class="input-group">
+                <input
+                    type="url"
+                    name="redirectURL"
+                    placeholder="Paste your long URL here (e.g., https://example.com)..."
+                    required
+                >
+            </div>
+            <button type="submit" class="btn-submit">
+                <span>Generate Link</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12" 5 19 12 12 19"></polyline></svg>
+            </button>
+        </form>
+
+        <div class="table-section animate-slide-up">
+            <h2>Generated Links</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Short Link</th>
+                            <th>Original Destination</th>
+                            <th class="text-center">Clicks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (urls && urls.length > 0) { %>
+                            <% urls.forEach((url)=> { %>
+                                <tr>
+                                    <td class="td-short">
+                                        <a href="/<%= url.shortId %>" target="_blank" class="short-link">
+                                            <%= url.shortId %>
+                                        </a>
+                                    </td>
+                                    <td class="td-long">
+                                        <div class="url-truncate" title="<%= url.redirectURL %>">
+                                            <%= url.redirectURL %>
+                                        </div>
+                                    </td>
+                                    <td class="td-clicks text-center">
+                                        <span class="badge-clicks">
+                                            <%= url.visitHistory.length %>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="3" class="text-center no-data">
+                                    No links shortened yet. Make your first one above!
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -4,7 +4,7 @@ const URL = require("../models/url");
 async function handleGenerateNewShortURL(req, res) {
   const body = req.body;
 
-  if (!body.url) {
+  if (!body.redirectURL) {
     return res.status(400).json({
       error: "URL is required",
     });
@@ -14,38 +14,11 @@ async function handleGenerateNewShortURL(req, res) {
 
   await URL.create({
     shortId: shortID,
-    redirectURL: body.url,
+    redirectURL: body.redirectURL,
     visitHistory: [],
   });
 
-  return res.json({
-    id: shortID,
-  });
-}
-
-async function handleRedirectURL(req, res) {
-  const shortId = req.params.shortId;
-
-  const entry = await URL.findOneAndUpdate(
-    {
-      shortId,
-    },
-    {
-      $push: {
-        visitHistory: {
-          timestamp: Date.now(),
-        },
-      },
-    }
-  );
-
-  if (!entry) {
-    return res.status(404).json({
-      error: "Short URL not found",
-    });
-  }
-
-  res.redirect(entry.redirectURL);
+  return res.redirect("/");
 }
 
 async function handleGetAnalytics(req, res) {
@@ -55,12 +28,6 @@ async function handleGetAnalytics(req, res) {
     shortId,
   });
 
-  if (!result) {
-    return res.status(404).json({
-      error: "Short URL not found",
-    });
-  }
-
   return res.json({
     totalClicks: result.visitHistory.length,
     analytics: result.visitHistory,
@@ -69,6 +36,5 @@ async function handleGetAnalytics(req, res) {
 
 module.exports = {
   handleGenerateNewShortURL,
-  handleRedirectURL,
   handleGetAnalytics,
 };
