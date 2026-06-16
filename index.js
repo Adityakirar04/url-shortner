@@ -1,5 +1,6 @@
  const express = require("express");
 const path = require("path");
+const cookieParser = require("cookie-parser");
 
 const { connectToMongoDB } = require("./connect");
 
@@ -7,6 +8,11 @@ const URL = require("./models/url");
 
 const urlRoute = require("./routes/url");
 const staticRoute = require("./routes/staticRouter");
+const userRoute = require("./routes/user");
+
+const {
+  checkAuth,
+} = require("./middlewares/auth");
 
 const app = express();
 const PORT = 8001;
@@ -24,11 +30,17 @@ app.set("views", path.resolve("./views"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Static Files (CSS, Images, JS)
+app.use(cookieParser());
+
+// Auth Middleware
+app.use(checkAuth);
+
+// Static Files
 app.use(express.static(path.resolve("./public")));
 
 // Routes
 app.use("/url", urlRoute);
+app.use("/user", userRoute);
 app.use("/", staticRoute);
 
 // Redirect Route
@@ -41,11 +53,9 @@ app.get("/:shortId", async (req, res) => {
     },
     {
       $push: {
-        visitHistory: [
-          {
-            timestamp: Date.now(),
-          },
-        ],
+        visitHistory: {
+          timestamp: Date.now(),
+        },
       },
     }
   );
@@ -54,7 +64,7 @@ app.get("/:shortId", async (req, res) => {
     return res.status(404).send("Short URL Not Found");
   }
 
-  res.redirect(entry.redirectURL);
+  return res.redirect(entry.redirectURL);
 });
 
 // Start Server

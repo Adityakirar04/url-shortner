@@ -16,6 +16,7 @@ async function handleGenerateNewShortURL(req, res) {
     shortId: shortID,
     redirectURL: body.redirectURL,
     visitHistory: [],
+    createdBy: req.user._id, // Authentication ke baad add hoga
   });
 
   return res.redirect("/");
@@ -27,6 +28,12 @@ async function handleGetAnalytics(req, res) {
   const result = await URL.findOne({
     shortId,
   });
+
+  if (!result) {
+    return res.status(404).json({
+      error: "URL not found",
+    });
+  }
 
   return res.json({
     totalClicks: result.visitHistory.length,
