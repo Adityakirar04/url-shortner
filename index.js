@@ -43,16 +43,14 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // -------------------- Database --------------------
+console.log("MONGO_URL =", process.env.MONGO_URL);
 
-connectToMongoDB(process.env.MONGO_URL)
-    .then(() => {
-        console.log("✅ MongoDB Connected");
-    })
-    .catch((err) => {
-        console.error("❌ MongoDB Connection Error:", err.message);
-        process.exit(1);
-    });
-
+ connectToMongoDB(process.env.MONGO_URL)
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => {
+    console.log("FULL ERROR:");
+    console.log(err);
+  });
 // -------------------- View Engine --------------------
 
 app.set("view engine", "ejs");

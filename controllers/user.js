@@ -1,16 +1,14 @@
  const User = require("../models/user");
-
 const { setUser } = require("../service/auth");
 
 // -------------------- Signup --------------------
 
 async function handleUserSignup(req, res) {
     try {
-
         const { name, email, password } = req.body;
 
         if (!name || !email || !password) {
-            return res.status(400).render("signup", {
+            return res.render("signup", {
                 error: "All fields are required",
             });
         }
@@ -18,7 +16,7 @@ async function handleUserSignup(req, res) {
         const existingUser = await User.findOne({ email });
 
         if (existingUser) {
-            return res.status(400).render("signup", {
+            return res.render("signup", {
                 error: "Email already exists",
             });
         }
@@ -31,14 +29,12 @@ async function handleUserSignup(req, res) {
 
         return res.redirect("/login");
 
-    } catch (error) {
+    } catch (err) {
+        console.log(err);
 
-        console.error("Signup Error:", error);
-
-        return res.status(500).render("signup", {
+        return res.render("signup", {
             error: "Something went wrong",
         });
-
     }
 }
 
@@ -49,35 +45,40 @@ async function handleUserLogin(req, res) {
 
         const { email, password } = req.body;
 
-        const user = await User.findOne({
-            email,
-            password,
-        });
+        console.log("Email :", email);
+        console.log("Password :", password);
+
+        const user = await User.findOne({ email });
+
+        console.log("User :", user);
 
         if (!user) {
-            return res.status(401).render("login", {
+            return res.render("login", {
                 error: "Invalid Email or Password",
             });
         }
 
-        // Generate JWT Token
+        if (user.password !== password) {
+            return res.render("login", {
+                error: "Invalid Email or Password",
+            });
+        }
+
         const token = setUser(user);
 
-        // Store JWT in Cookie
         res.cookie("uid", token, {
             httpOnly: true,
         });
 
         return res.redirect("/");
 
-    } catch (error) {
+    } catch (err) {
 
-        console.error("Login Error:", error);
+        console.log(err);
 
-        return res.status(500).render("login", {
+        return res.render("login", {
             error: "Something went wrong",
         });
-
     }
 }
 
