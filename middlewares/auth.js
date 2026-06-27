@@ -1,40 +1,50 @@
  const { getUser } = require("../service/auth");
 
-async function restrictToLoggedinUserOnly(
-  req,
-  res,
-  next
-) {
-  const userUid = req.cookies?.uid;
+async function restrictToLoggedinUserOnly(req, res, next) {
+    try {
+        const userUid = req.cookies?.uid;
 
-  if (!userUid)
-    return res.redirect("/login");
+        if (!userUid) {
+            return res.redirect("/login");
+        }
 
-  const user = getUser(userUid);
+        const user = getUser(userUid);
 
-  if (!user)
-    return res.redirect("/login");
+        if (!user) {
+            return res.redirect("/login");
+        }
 
-  req.user = user;
+        req.user = user;
 
-  next();
+        next();
+    } catch (error) {
+        console.error("Authentication Error:", error);
+        return res.status(500).send("Internal Server Error");
+    }
 }
 
-async function checkAuth(
-  req,
-  res,
-  next
-) {
-  const userUid = req.cookies?.uid;
+async function checkAuth(req, res, next) {
+    try {
+        const userUid = req.cookies?.uid;
 
-  const user = getUser(userUid);
+        if (!userUid) {
+            req.user = null;
+            return next();
+        }
 
-  req.user = user;
+        const user = getUser(userUid);
 
-  next();
+        req.user = user || null;
+
+        next();
+    } catch (error) {
+        console.error("Authentication Error:", error);
+        req.user = null;
+        next();
+    }
 }
 
 module.exports = {
-  restrictToLoggedinUserOnly,
-  checkAuth,
+    restrictToLoggedinUserOnly,
+    checkAuth,
 };

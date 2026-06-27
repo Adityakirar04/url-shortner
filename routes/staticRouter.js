@@ -4,28 +4,35 @@ const URL = require("../models/url");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
+    try {
+        // Agar user login nahi hai to login page par bhejo
+        if (!req.user) {
+            return res.redirect("/login");
+        }
 
-  if (!req.user) {
-    return res.render("home", {
-      urls: [],
-    });
-  }
+        const allUrls = await URL.find({
+            createdBy: req.user._id,
+        });
 
-  const allUrls = await URL.find({
-    createdBy: req.user._id,
-  });
+        return res.render("home", {
+            urls: allUrls,
+        });
 
-  return res.render("home", {
-    urls: allUrls,
-  });
+    } catch (err) {
+        console.error("Home Route Error:", err);
+
+        return res.status(500).render("error", {
+            message: "Internal Server Error",
+        });
+    }
 });
 
 router.get("/signup", (req, res) => {
-  return res.render("signup");
+    return res.render("signup");
 });
 
 router.get("/login", (req, res) => {
-  return res.render("login");
+    return res.render("login");
 });
 
 module.exports = router;
